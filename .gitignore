@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Data and generated results (not part of the repository)
+*.wav
+*.npy
+*.npz
+*.mat
+*.pkl
+*.csv
+*.xlsx
+*.png
+*.svg
+*.pdf
+*.log

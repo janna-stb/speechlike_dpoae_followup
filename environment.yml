@@ -1,0 +1,17 @@
+name: speechlike_dpoae
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - seaborn
+  - statsmodels
+  - librosa
+  - pysoundfile
+  - openpyxl
+  - pip
+  - pip:
+      - praat-parselmouth   # f0 estimation and PSOLA pitch shifting (stimulus generation)
