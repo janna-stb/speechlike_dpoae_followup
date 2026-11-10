@@ -17,7 +17,7 @@ This repository is a further development of that code, not a drop-in replacement
 - Power spectral density (PSD) and magnitude-squared coherence (MSC) were added as metrics.
 - The statistics module adds Gaussian fits of the grand-average cross-correlations and AUC-based measures.
 - Several default parameters differ, e.g. the window in which the cross-correlation peak is searched.
-- The estimation of stimulus levels was corrected. The JS25 stimulus levels initially reported in the Frontiers paper were too low; they have been corrected.
+- The estimation of stimulus levels was corrected. The JS25 stimulus levels initially reported in Steinebach & Reichenbach (2026) were too low; a correction has been added to that article.
 
 Running this code on the JS25 data therefore does not reproduce the numbers of Steinebach & Reichenbach (2026) exactly. The stimulus-generation code also differs from the earlier version (f0 estimation with Praat, pitch shifting of the audiobooks, an anti-aliasing low-pass filter and a different normalisation); the JS25 stimuli are generated with the earlier repository.
 
@@ -27,7 +27,7 @@ Running this code on the JS25 data therefore does not reproduce the numbers of S
 - **JS25**: Steinebach & Reichenbach (2026), *Frontiers in Neuroscience*, data on Zenodo ([doi:10.5281/zenodo.16837673](https://doi.org/10.5281/zenodo.16837673)). Processed with `DPOAEProcessorJS25`.
 - **JS26**: second experiment with pitch-shifted voices, data on Zenodo (upload pending). Processed with `DPOAEProcessor` (alias `DPOAEProcessorJS26`).
 
-Each dataset also processed a set of out-of-ear control recordings (participants `outofear_01`, ...). For JS26 they are published alongside the participant recordings on Zenodo (`Recordings_outofear/`).
+For each dataset, out-of-ear control recordings were made (participants `outofear_01`, ...) and can be processed with the same classes. Only the JS26 out-of-ear recordings are published, together with the participant recordings on Zenodo (`Recordings_outofear/`); the out-of-ear recordings of JS25 and MSA21 are not published.
 
 ## Repository structure
 
@@ -81,7 +81,7 @@ Paths to the data are not part of the repository. Set them where indicated: `DAT
 
 ### 1. Per-participant processing
 
-Once per dataset folder (including the out-of-ear folders), compute the autocorrelations of the DP waveforms and the DPOAE frequency bands. The autocorrelations are used for the Gaussian fits in step 3, the frequency bands for the MSC and PSD:
+Once per dataset folder (for JS25 and MSA21 also in the separate out-of-ear folders; for JS26, in-ear and out-of-ear recordings share one folder), compute the autocorrelations of the DP waveforms and the DPOAE frequency bands. The autocorrelations are used for the Gaussian fits in step 3, the frequency bands for the MSC and PSD:
 
 ```python
 from DPOAE_processor import DPOAEProcessor
@@ -145,12 +145,9 @@ stats.prepare_barplot_data_sigpeaks()
 stats.prepare_barplot_data_sigpeaks(per_participant=True)
 
 # attention modulation coefficient, AMC = 2 (attended - ignored) / (attended + ignored)
-stats.convert_boxplot_data_for_amc(cc['mag'], f'AMC_data_crosscorr_mag_avgP.npy', dataset=dataset)
-
-stats.convert_boxplot_data_for_amc(cc_pP['auc'], f'AMC_data_crosscorr_auc_pP.npy', dataset=dataset)    
-    
+stats.convert_boxplot_data_for_amc(cc['mag'], 'AMC_data_crosscorr_mag_avgP.npy', dataset=dataset)
+stats.convert_boxplot_data_for_amc(cc_pP['auc'], 'AMC_data_crosscorr_auc_pP.npy', dataset=dataset)
 stats.convert_boxplot_data_for_amc(msc['MSCpw'], 'AMC_data_MSCpw_corrected_avgP.npy', dataset=dataset)
-
 stats.convert_boxplot_data_for_amc(psd['PSD_Pa'], 'AMC_data_PSD_Pa_avgP.npy', dataset=dataset)
 ```
 
@@ -187,6 +184,8 @@ Run the scripts in `stimulus_generation/` in the order of their step numbers. So
 3. `generate_multiband_stimuli.py` combines the waveforms of both voices into the stereo stimuli and mixes the audiobook chapters, with the level of the female voice matched to the male voice.
 
 The resulting stimuli are uncalibrated; the presentation level was calibrated separately in the experimental setup.
+
+The source audiobooks are not published, because the texts are protected by copyright. The stimulus-generation scripts therefore cannot be rerun with the published data, but all generated stimuli and DP waveforms needed for the analysis are part of the JS26 dataset on Zenodo.
 
 ## Citation
 
