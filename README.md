@@ -3,7 +3,7 @@
 Analysis and stimulus-generation code for measuring speech-like distortion product otoacoustic emissions (DPOAEs) with speech-derived stimuli. The code accompanies two manuscripts (in preparation):
 
 - a **methods paper** comparing metrics for detecting speech-like DPOAEs (cross-correlation, power spectral density, magnitude-squared coherence) across three datasets, and
-- a paper reporting the outcome of a **second experiment on attentional effects on speech-like DPOAEs** in a competing-speaker paradigm with pitch-shifted voices, which could not reproduce the attentional effects reported in the Frontiers paper (see below).
+- a paper reporting the outcome of a **second experiment on attentional effects on speech-like DPOAEs** in a competing-speaker paradigm with pitch-shifted voices, which could not reproduce the attentional effects reported in Steinebach & Reichenbach (2026) (see below).
 
 The repository contains the code to generate the stimuli of the second experiment, the processing of the recordings, and all subsequent analyses of the derived metrics.
 
@@ -17,17 +17,17 @@ This repository is a further development of that code, not a drop-in replacement
 - Power spectral density (PSD) and magnitude-squared coherence (MSC) were added as metrics.
 - The statistics module adds Gaussian fits of the grand-average cross-correlations and AUC-based measures.
 - Several default parameters differ, e.g. the window in which the cross-correlation peak is searched.
-- The estimation of stimulus levels was corrected. The JS25 stimulus levels reported in the Frontiers paper are too low; the corrected values are given in the methods paper.
+- The estimation of stimulus levels was corrected. The JS25 stimulus levels initially reported in the Frontiers paper were too low; they have been corrected.
 
-Running this code on the JS25 data therefore does not reproduce the numbers of the Frontiers paper exactly. The stimulus-generation code also differs from the earlier version (f0 estimation with Praat, pitch shifting of the audiobooks, an anti-aliasing low-pass filter and a different normalisation); the JS25 stimuli are generated with the earlier repository.
+Running this code on the JS25 data therefore does not reproduce the numbers of Steinebach & Reichenbach (2026) exactly. The stimulus-generation code also differs from the earlier version (f0 estimation with Praat, pitch shifting of the audiobooks, an anti-aliasing low-pass filter and a different normalisation); the JS25 stimuli are generated with the earlier repository.
 
 ## Datasets
 
-- **MSA21**: Saiz-Alía & Reichenbach (2021), *eNeuro*. Processed with `DPOAEProcessorMSA21`.
+- **MSA21**: Saiz-Alía & Reichenbach (2021), *eNeuro*, data on figshare ([doi.org/10.6084/m9.figshare.12738515](https://doi.org/10.6084/m9.figshare.12738515)). Processed with `DPOAEProcessorMSA21`.
 - **JS25**: Steinebach & Reichenbach (2026), *Frontiers in Neuroscience*, data on Zenodo ([doi:10.5281/zenodo.16837673](https://doi.org/10.5281/zenodo.16837673)). Processed with `DPOAEProcessorJS25`.
-- **JS26**: second experiment with pitch-shifted voices. Processed with `DPOAEProcessor` (alias `DPOAEProcessorJS26`).
+- **JS26**: second experiment with pitch-shifted voices, data on Zenodo (upload pending). Processed with `DPOAEProcessor` (alias `DPOAEProcessorJS26`).
 
-Each dataset also has a set of out-of-ear control recordings (folders `<dataset>_outofear`, participants `outofear_01`, ...), which are processed with the same classes.
+Each dataset also processed a set of out-of-ear control recordings (participants `outofear_01`, ...). For JS26 they are published alongside the participant recordings on Zenodo (`Recordings_outofear/`).
 
 ## Repository structure
 
@@ -67,8 +67,9 @@ The modules import each other by name, so run the code from within `analysis/` o
 Paths to the data are not part of the repository. Set them where indicated: `DATA_ROOT` in `sort_files_to_conditions.py`, and `data_path` / `main_path` at the top of the stimulus scripts. Each processor class expects one folder per dataset (`exp_path`) and writes its results to `exp_path/results_<participant>/`. The expected layout is described in the docstring of each class:
 
 - **JS26** (`DPOAEProcessor`):
-    - `data/`: recordings, PsychoPy csv files and `<participant>_target_info.csv` of all participants
-    - `Stimuli/`: harmonic waveforms (`STORY_<voice>/`, `NOISE_<voice>/`) and DP waveforms (`DP_STORY_<voice>/`, `DP_NOISE_<voice>/`), each with one subfolder per f0 (`f0_to_<f0>Hz/`)
+    - `Recordings_inear/data_<participant>/`: `<participant>_psychopy_info.csv`, `<participant>_target_info.csv`, `<participant>_recording_OAE_PT.wav` and the folder `<participant>_recordings_contralateral/`
+    - `Recordings_outofear/data_<participant>/`: same structure for the out-of-ear recordings
+    - `Stimuli/`: presented stimuli (`<harm_cond>/competing_stimuli_.../`) and DP waveforms (`DP_STORY_<voice>/`, `DP_NOISE_<voice>/`, each with one subfolder per f0, `f0_to_<f0>Hz/`)
 - **JS25** (`DPOAEProcessorJS25`): as published on Zenodo
     - `Recordings/data_<participant>/`: recordings and experiment files
     - `Stimuli/`: presented stimuli and DP waveforms
@@ -135,8 +136,7 @@ stats.compute_grand_average(method='psd')
 
 # values per participant: evaluated at the grand-average peak, with AUC and fitted widths
 cc = stats.prepare_boxplot_data_crosscorr('GA_crosscorr', ga_peak=True, fit_peaks=True, avg_participant=True)
-cc_pP = stats.prepare_boxplot_data_crosscorr('GA_crosscorr', ga_peak=True, fit_peaks=True,
-                                             per_participant=True, avg_participant=False)
+cc_pP = stats.prepare_boxplot_data_crosscorr('GA_crosscorr', ga_peak=True, fit_peaks=True, per_participant=True, avg_participant=False)
 msc = stats.prepare_boxplot_data_msc(corrected=True)
 psd = stats.prepare_boxplot_data_psd()
 
@@ -145,11 +145,12 @@ stats.prepare_barplot_data_sigpeaks()
 stats.prepare_barplot_data_sigpeaks(per_participant=True)
 
 # attention modulation coefficient, AMC = 2 (attended - ignored) / (attended + ignored)
-for metric in ['snr', 'mag']:
-    stats.convert_boxplot_data_for_amc(cc[metric], f'AMC_data_crosscorr_{metric}_avgP.npy', dataset=dataset)
-for metric in ['auc', 'sigma', 'GAmag']:
-    stats.convert_boxplot_data_for_amc(cc_pP[metric], f'AMC_data_crosscorr_{metric}_pP.npy', dataset=dataset)
+stats.convert_boxplot_data_for_amc(cc['mag'], f'AMC_data_crosscorr_mag_avgP.npy', dataset=dataset)
+
+stats.convert_boxplot_data_for_amc(cc_pP['auc'], f'AMC_data_crosscorr_auc_pP.npy', dataset=dataset)    
+    
 stats.convert_boxplot_data_for_amc(msc['MSCpw'], 'AMC_data_MSCpw_corrected_avgP.npy', dataset=dataset)
+
 stats.convert_boxplot_data_for_amc(psd['PSD_Pa'], 'AMC_data_PSD_Pa_avgP.npy', dataset=dataset)
 ```
 

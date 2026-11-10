@@ -61,7 +61,7 @@ DATASETS = {
     ),
     'js26_outofear': dict(
         dataset='JS26',
-        data_path=DATA_ROOT / 'JS26_outofear',
+        data_path=DATA_ROOT / 'JS26',  # in-ear and out-of-ear recordings share one dataset folder
         subjects=_subject_ids('outofear_', 1, 13),
         evaluation_folders=['DPOAE_analysis_contra'],
     ),

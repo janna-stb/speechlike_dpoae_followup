@@ -12,13 +12,19 @@ signal-processing methods are shared.
 Expected layout of a JS26 experiment folder (`exp_path`)::
 
     exp_path/
-        data/                       raw data of all participants (recordings, PsychoPy csv
-                                    files, <participant>_target_info.csv)
-        Stimuli/                    harmonic waveforms, DP waveforms and presented stimuli
-            STORY_Male/f0_to_140Hz/M_01_n6.wav, ...
-            DP_STORY_Male/f0_to_140Hz/M_01_n4.wav, ...
-            NOISE_Female/..., DP_NOISE_Female/..., ...
-        results_<participant>/      created by this class
+        Recordings_inear/
+            data_<participant>/                       e.g. data_P01
+                <participant>_psychopy_info.csv       responses saved by PsychoPy
+                <participant>_target_info.csv         trial order, stimulus paths, correct answers
+                <participant>_recording_OAE_PT.wav    pure-tone DPOAE recording
+                <participant>_recordings_contralateral/<rep>_Ch<ch>_<harm_cond>_target_<voice>_rec_contra.wav
+        Recordings_outofear/
+            data_<participant>/                       e.g. data_outofear_01, same structure
+        Stimuli/
+            <harm_cond>/competing_stimuli_STORY_<voice>_NOISE_<voice>/Ch_<ch>_....wav   presented stimuli
+            DP_STORY_<voice>/f0_to_<f0>Hz/<v>_<ch>_n<k>.wav                             DP waveforms
+            DP_NOISE_<voice>/f0_to_<f0>Hz/NOISE_<v>_<ch>_n<k>.wav
+        results_<participant>/                        created by this class
 """
 
 import csv
@@ -55,9 +61,10 @@ class DPOAEProcessor:
     Attributes
     ----------
     data_path : Path
-        Folder containing the raw data (`exp_path/data`).
+        Folder containing the participant's data (`exp_path/Recordings_inear/data_<subject>`,
+        or `Recordings_outofear` for participant IDs starting with 'outofear').
     stim_path : Path
-        Folder containing the harmonic and DP waveforms (`exp_path/Stimuli`).
+        Folder containing the presented stimuli and the DP waveforms (`exp_path/Stimuli`).
     sig_border : int
         Percentile of the noise region that a peak has to exceed to count as significant.
     pref : float
@@ -77,7 +84,8 @@ class DPOAEProcessor:
     def __init__(self, subject, exp_path, res_path=None):
         self.subject = subject
         self.exp_path = Path(exp_path)
-        self.data_path = self.exp_path / 'data'
+        recordings = 'Recordings_outofear' if subject.startswith('outofear') else 'Recordings_inear'
+        self.data_path = self.exp_path / recordings / f'data_{subject}'
         self.stim_path = self.exp_path / 'Stimuli'
         self.res_path = self.exp_path / f'results_{subject}' if res_path is None else Path(res_path)
         self.res_path.mkdir(parents=True, exist_ok=True)
@@ -113,10 +121,7 @@ class DPOAEProcessor:
             One row per trial with the columns 'Rep', 'Given_Q1', 'Given_Q2', 'Given_Q3'
             and 'Listening_Effort'.
         """
-        csv_files = sorted(glob.glob(str(self.data_path / f'{self.subject}_Setup_Objective1B_*.csv')))
-        if not csv_files:
-            raise FileNotFoundError(f'No PsychoPy csv file found for {self.subject} in {self.data_path}.')
-        csv_info = pd.read_csv(csv_files[0])
+        csv_info = pd.read_csv(self.data_path / f'{self.subject}_psychopy_info.csv')
 
         csv_cols = ['loop_attention_targets.thisRepN', 'loop_attention_targets.slider_Q1.response',
                     'loop_attention_targets.slider_Q2.response', 'loop_attention_targets.slider_Q3.response',
@@ -140,7 +145,7 @@ class DPOAEProcessor:
         Returns
         -------
         target_info : pd.DataFrame
-            Content of `data/<subject>_target_info.csv`.
+            Content of `<subject>_target_info.csv`.
         """
         return pd.read_csv(self.data_path / f'{self.subject}_target_info.csv', sep='\t')
 
@@ -225,10 +230,8 @@ class DPOAEProcessor:
         rec_pt : np.ndarray
             The pure-tone recording.
         """
-        pt_recs = glob.glob(str(self.data_path / f'{self.subject}_**_recording_OAE_PT.wav'))
-        if len(pt_recs) != 1:
-            raise ValueError(f'Found {len(pt_recs)} pure tone recordings.')
-        rec_pt, _ = librosa.load(pt_recs[0], sr=self.fs, mono=True, dtype=np.float64)
+        rec_pt, _ = librosa.load(self.data_path / f'{self.subject}_recording_OAE_PT.wav', sr=self.fs, mono=True,
+                                 dtype=np.float64)
         return rec_pt
 
     def load_dpoae_recordings(self):
@@ -239,7 +242,7 @@ class DPOAEProcessor:
         rec_paths : list of str
             Sorted paths to all recordings.
         """
-        return sorted(glob.glob(str(self.data_path / f'{self.subject}_*_recordings_contralateral/*.wav')))
+        return sorted(glob.glob(str(self.data_path / f'{self.subject}_recordings_contralateral' / '*.wav')))
 
     def load_dp_waveforms(self, stim_path, return_dp_path=False):
         """Load the expected DP waveforms of the target (attended) and the noise (ignored)
@@ -249,7 +252,7 @@ class DPOAEProcessor:
         ----------
         stim_path : str or Path
             Path of the presented stimulus as given in the target information, of the form
-            '<folder>/<harm_cond>/competing_stimuli_STORY_<voice>_NOISE_<voice>/Ch_<ch>_....wav'.
+            'Calibrated_Stimuli/<harm_cond>/competing_stimuli_STORY_<voice>_NOISE_<voice>/Ch_<ch>_....wav'.
             Harmonic condition, chapter and voices are read from this path.
         return_dp_path : bool, optional
             If True, return the paths of the DP waveforms instead of the waveforms. Default is False.
@@ -1202,7 +1205,9 @@ class DPOAEProcessor:
             assert rec_name_parts[5] == target, f'Recording {rec_path} does not match target {target} in target info!'
 
             oae_rec = librosa.load(rec_path, sr=self.fs, mono=True)[0]
-            stimulus = librosa.load(self.exp_path / stim_path, sr=self.fs, mono=False)[0]
+            # the target info gives the stimulus path on the experiment computer
+            # ('Calibrated_Stimuli/<harm_cond>/...'); in the dataset, these files are in `stim_path`
+            stimulus = librosa.load(self.stim_path / Path(*stim_path.parts[1:]), sr=self.fs, mono=False)[0]
 
             mean_vol_stim, max_vol_stim = self.estimate_level(oae_rec)
 
