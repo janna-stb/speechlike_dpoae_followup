@@ -1,4 +1,4 @@
-# speechlike_dpoae_followup
+# Speech-like DPOAE Stimulus Generation and Data Analysis
 
 Analysis and stimulus-generation code for measuring speech-like distortion product otoacoustic emissions (DPOAEs) with speech-derived stimuli. The code accompanies two manuscripts (in preparation):
 
