@@ -5,8 +5,6 @@ and of the competing voice are combined into the stereo stimuli with
 `multiband_generator.create_multiband_competingspeaker`, and the corresponding audiobook
 chapters are mixed with `mix_books` (competing voice starting after `offset` s, female voice
 level-matched to the male voice with the level differences in `dBdiff_shift`).
-
-Author: Janna Steinebach
 """
 
 from pathlib import Path

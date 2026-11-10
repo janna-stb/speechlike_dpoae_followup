@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Steinebach"
+    given-names: "Janna"
+    orcid: "https://orcid.org/0009-0005-7171-1760"
+title: "Code for speech-like DPOAE stimulus generation and cross-dataset analysis"
+version: 1.0.0
+url: "https://github.com/janna-stb/speechlike_dpoae_followup"
+repository-code: "https://github.com/janna-stb/speechlike_dpoae_followup"
+license: MIT
+keywords:
+  - otoacoustic emissions
+  - DPOAE
+  - speech
+  - auditory attention
+  - signal processing
+references:
+  - type: article
+    authors:
+      - family-names: "Steinebach"
+        given-names: "Janna"
+        orcid: "https://orcid.org/0009-0005-7171-1760"
+      - family-names: "Reichenbach"
+        given-names: "Tobias"
+        orcid: "https://orcid.org/0000-0003-3367-3511"
+    title: "Attention to speech modulates distortion product otoacoustic emissions evoked by speech-derived stimuli in humans"
+    journal: "Front. Neurosci."
+    year: 2026
+    doi: "10.3389/fnins.2026.1756386"

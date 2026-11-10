@@ -7,8 +7,6 @@ each shifted chapter, the harmonic waveforms (`harms`) and DP waveforms are gene
 `stimulus_generator`, using a fixed bandwidth of the fundamental waveform (`bw`, in Hz):
 10 Hz for resolved and 5 Hz for unresolved harmonics. Finally, the pure-tone stimulus is
 created.
-
-Author: Janna Steinebach
 """
 
 from datetime import datetime
