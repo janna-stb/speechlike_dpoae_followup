@@ -25,7 +25,7 @@ Running this code on the JS25 data therefore does not reproduce the numbers of S
 
 - **MSA21**: Saiz-Alía & Reichenbach (2021), *eNeuro*, data on figshare ([doi.org/10.6084/m9.figshare.12738515](https://doi.org/10.6084/m9.figshare.12738515)). Processed with `DPOAEProcessorMSA21`.
 - **JS25**: Steinebach & Reichenbach (2026), *Frontiers in Neuroscience*, data on Zenodo ([doi:10.5281/zenodo.16837673](https://doi.org/10.5281/zenodo.16837673)). Processed with `DPOAEProcessorJS25`.
-- **JS26**: second experiment with pitch-shifted voices, data on Zenodo (upload pending). Processed with `DPOAEProcessor` (alias `DPOAEProcessorJS26`).
+- **JS26**: second experiment with pitch-shifted voices, data on Zenodo ([10.5281/zenodo.24104371](https://doi.org/10.5281/zenodo.24104371)). Processed with `DPOAEProcessor` (alias `DPOAEProcessorJS26`).
 
 For each dataset, out-of-ear control recordings were made (participants `outofear_01`, ...) and can be processed with the same classes. Only the JS26 out-of-ear recordings are published, together with the participant recordings on Zenodo (`Recordings_outofear/`); the out-of-ear recordings of JS25 and MSA21 are not published.
 
